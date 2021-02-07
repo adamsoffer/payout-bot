@@ -1,0 +1,13 @@
+name: 1-minute-cron
+on:
+  schedule:
+    - cron: "* * * * *" # run every minute
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: poll for new payouts
+        run: |
+          curl --request POST \
+          --url 'https://payout-bot.vercel.app/api/discord' \
+          --header 'Authorization: Bearer ${{ secrets.API_TOKEN }}'
