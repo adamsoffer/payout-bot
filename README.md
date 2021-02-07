@@ -1,3 +1,3 @@
 # Livepeer Payout Bot
 
-Payout bot for Livepeer
+Payout bot for Livepeer. Currently supports Discord.
