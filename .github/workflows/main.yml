@@ -2,6 +2,7 @@ name: 1-minute-cron
 on:
   schedule:
     - cron: "* * * * *" # run every minute
+  workflow_dispatch:
 jobs:
   cron:
     runs-on: ubuntu-latest
