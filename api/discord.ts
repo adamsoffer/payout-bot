@@ -25,8 +25,8 @@ async function connectToDatabase(uri) {
   return db;
 }
 
-export default async (_req: VercelRequest, res: VercelResponse) => {
-  if (_req.headers.authorization !== `Bearer ${process.env.API_TOKEN}`) {
+export default async (req: VercelRequest, res: VercelResponse) => {
+  if (req.headers.authorization !== `Bearer ${process.env.API_TOKEN}`) {
     res.status(403);
     res.json({
       errors: ["Unauthorizaed"],
