@@ -1,3 +1,3 @@
 # Livepeer Payout Bot
 
-Payout bot for Livepeer
+Sends a message in Discord anytime an orchestrator gets paid.
