@@ -65,8 +65,6 @@ export default async (_req: NowRequest, res: NowResponse) => {
   // if the most recent payout happened after the last
   // one we stored notify discord and save new timestamp
   if (winningTicketRedeemedEvents[0].timestamp > timestamp) {
-    const Box = require("3box");
-
     let profile = await Box.getProfile(
       winningTicketRedeemedEvents[0].recipient.id
     );
