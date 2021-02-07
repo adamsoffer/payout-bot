@@ -107,9 +107,7 @@ export default async (_req: NowRequest, res: NowResponse) => {
               winningTicketRedeemedEvents[0].faceValue
             ).toFixed(4)} ETH ($${parseFloat(
               winningTicketRedeemedEvents[0].faceValueUSD
-            ).toFixed(2)})**.\n[](https://etherscan.io/tx/${
-              winningTicketRedeemedEvents[0].transaction.id
-            })`,
+            ).toFixed(2)})**.`,
             timestamp: new Date(
               winningTicketRedeemedEvents[0].timestamp * 1000
             ).toISOString(),
