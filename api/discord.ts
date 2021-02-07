@@ -47,6 +47,9 @@ export default async (_req: NowRequest, res: NowResponse) => {
         recipient {
           id
         }
+        transaction {
+          id
+        }
       }
     }
   `;
@@ -64,16 +67,20 @@ export default async (_req: NowRequest, res: NowResponse) => {
     await fetch(process.env.DISCORD_WEBHOOK_URL, {
       method: "POST",
       body: JSON.stringify({
-        username: "Payout Bot",
+        username: "Payout Alert Bot",
         avatar_url:
           "https://user-images.githubusercontent.com/555740/107154952-a6f91880-6943-11eb-84e3-75a9dd06dfaa.png",
-        content: `Orchestrator **${
+        content: `Orchestrator [**${
           winningTicketRedeemedEvents[0].recipient.id
-        }** just redeemed **${parseFloat(
+        }**](https://explorer.livepeer.org/accounts/${
+          winningTicketRedeemedEvents[0].recipient.id
+        }/staking) just redeemed **${parseFloat(
           winningTicketRedeemedEvents[0].faceValue
         ).toFixed(4)} ETH ($${parseFloat(
           winningTicketRedeemedEvents[0].faceValueUSD
-        ).toFixed(2)})**.`,
+        ).toFixed(2)})**.\n[](https://etherscan.io/tx/${
+          winningTicketRedeemedEvents[0].transaction.id
+        })`,
       }),
       headers: { "Content-Type": "application/json" },
     });
@@ -84,5 +91,5 @@ export default async (_req: NowRequest, res: NowResponse) => {
       .replaceOne({}, { timestamp: winningTicketRedeemedEvents[0].timestamp });
   }
 
-  res.status(200).send(true);
+  res.status(200).send("Success");
 };
