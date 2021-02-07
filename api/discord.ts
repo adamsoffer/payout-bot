@@ -25,9 +25,7 @@ async function connectToDatabase(uri) {
 }
 
 export default async (_req: NowRequest, res: NowResponse) => {
-  const authorization = _req.headers.authorization;
-  console.log(authorization);
-  if (authorization !== `Bearer ${process.env.API_TOKEN}`) {
+  if (_req.headers.authorization !== `Bearer ${process.env.API_TOKEN}`) {
     res.status(403);
     res.json({
       errors: ["Unauthorizaed"],
