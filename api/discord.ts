@@ -1,5 +1,6 @@
 import { NowRequest, NowResponse } from "@vercel/node";
 import { request, gql } from "graphql-request";
+import Box from "3box";
 
 const fetch = require("@vercel/fetch")();
 
@@ -64,23 +65,64 @@ export default async (_req: NowRequest, res: NowResponse) => {
   // if the most recent payout happened after the last
   // one we stored notify discord and save new timestamp
   if (winningTicketRedeemedEvents[0].timestamp > timestamp) {
+    const Box = require("3box");
+
+    let profile = await Box.getProfile(
+      winningTicketRedeemedEvents[0].recipient.id
+    );
+    let space = await Box.getSpace(
+      winningTicketRedeemedEvents[0].recipient.id,
+      "livepeer"
+    );
+
+    let name = winningTicketRedeemedEvents[0].recipient.id.replace(
+      winningTicketRedeemedEvents[0].recipient.id.slice(8, 36),
+      "…"
+    );
+    let image = null;
+
+    if (space?.defaultProfile === "3box") {
+      name = profile.name;
+      image = profile?.image?.length && profile?.image[0].contentUrl["/"];
+    }
+
+    if (space?.defaultProfile === "livepeer") {
+      name = space.name;
+      if (space?.image) {
+        image = `https://ipfs.infura.io/ipfs/${space.image}`;
+      }
+    }
+
     await fetch(process.env.DISCORD_WEBHOOK_URL, {
       method: "POST",
       body: JSON.stringify({
         username: "Payout Alert Bot",
         avatar_url:
-          "https://user-images.githubusercontent.com/555740/107154952-a6f91880-6943-11eb-84e3-75a9dd06dfaa.png",
-        content: `Orchestrator [**${
-          winningTicketRedeemedEvents[0].recipient.id
-        }**](https://explorer.livepeer.org/accounts/${
-          winningTicketRedeemedEvents[0].recipient.id
-        }/staking) just redeemed **${parseFloat(
-          winningTicketRedeemedEvents[0].faceValue
-        ).toFixed(4)} ETH ($${parseFloat(
-          winningTicketRedeemedEvents[0].faceValueUSD
-        ).toFixed(2)})**.\n[](https://etherscan.io/tx/${
-          winningTicketRedeemedEvents[0].transaction.id
-        })`,
+          "https://user-images.githubusercontent.com/555740/107160745-213a9480-6966-11eb-927f-a53ae12ab219.png",
+        embeds: [
+          {
+            color: 60296,
+            title: "Orchestrator Payout",
+            description: `[**${name}**](https://explorer.livepeer.org/accounts/${
+              winningTicketRedeemedEvents[0].recipient.id
+            }/staking) just redeemed **${parseFloat(
+              winningTicketRedeemedEvents[0].faceValue
+            ).toFixed(4)} ETH ($${parseFloat(
+              winningTicketRedeemedEvents[0].faceValueUSD
+            ).toFixed(2)})**.\n[](https://etherscan.io/tx/${
+              winningTicketRedeemedEvents[0].transaction.id
+            })`,
+            timestamp: new Date(
+              winningTicketRedeemedEvents[0].timestamp * 1000
+            ).toISOString(),
+            url: `https://etherscan.io/tx/${winningTicketRedeemedEvents[0].transaction.id}`,
+            ...(image && {
+              thumbnail: {
+                url: image,
+              },
+            }),
+          },
+        ],
       }),
       headers: { "Content-Type": "application/json" },
     });
