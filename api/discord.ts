@@ -1,4 +1,4 @@
-import { NowRequest, NowResponse } from "@vercel/node";
+import { VercelRequest, VercelResponse } from "@vercel/node";
 import { request, gql } from "graphql-request";
 import Box from "3box";
 
@@ -25,7 +25,7 @@ async function connectToDatabase(uri) {
   return db;
 }
 
-export default async (_req: NowRequest, res: NowResponse) => {
+export default async (_req: VercelRequest, res: VercelResponse) => {
   if (_req.headers.authorization !== `Bearer ${process.env.API_TOKEN}`) {
     res.status(403);
     res.json({
