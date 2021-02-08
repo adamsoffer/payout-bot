@@ -103,7 +103,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             title: "Orchestrator Payout",
             description: `[**${name}**](https://explorer.livepeer.org/accounts/${
               winningTicketRedeemedEvents[0].recipient.id
-            }/staking) just redeemed **${parseFloat(
+            }/campaign) just redeemed **${parseFloat(
               winningTicketRedeemedEvents[0].faceValue
             ).toFixed(4)} ETH ($${parseFloat(
               winningTicketRedeemedEvents[0].faceValueUSD
