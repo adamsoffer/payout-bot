@@ -1,8 +1,16 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { request, gql } from "graphql-request";
 import Box from "3box";
+import Twitter from "twitter";
 
 const fetch = require("@vercel/fetch")();
+
+const client = new Twitter({
+  consumer_key: process.env.TWITTER_CONSUMER_KEY,
+  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+  access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY,
+  access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
+});
 
 // Create cached connection variable
 let cachedDb = null;
@@ -91,6 +99,16 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       }
     }
 
+    await client.post("statuses/update", {
+      status: `Livepeer orchestrator ${name} just redeemed ${parseFloat(
+        winningTicketRedeemedEvents[0].faceValue
+      ).toFixed(4)} ETH ($${parseFloat(
+        winningTicketRedeemedEvents[0].faceValueUSD
+      ).toFixed(2)}). https://etherscan.io/tx/${
+        winningTicketRedeemedEvents[0].transaction.id
+      }`,
+    });
+
     await fetch(process.env.DISCORD_WEBHOOK_URL, {
       method: "POST",
       body: JSON.stringify({
@@ -108,9 +126,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             ).toFixed(4)} ETH ($${parseFloat(
               winningTicketRedeemedEvents[0].faceValueUSD
             ).toFixed(2)})**.`,
-            timestamp: new Date(
-              winningTicketRedeemedEvents[0].timestamp * 1000
-            ).toISOString(),
             url: `https://etherscan.io/tx/${winningTicketRedeemedEvents[0].transaction.id}`,
             ...(image && {
               thumbnail: {

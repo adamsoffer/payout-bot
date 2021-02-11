@@ -9,7 +9,8 @@
     "discord.js": "^12.5.1",
     "graphql": "^15.5.0",
     "graphql-request": "^3.4.0",
-    "mongodb": "^3.6.4"
+    "mongodb": "^3.6.4",
+    "twitter": "^1.7.1"
   },
   "devDependencies": {
     "@livepeer/prettier-config": "^1.0.1",
