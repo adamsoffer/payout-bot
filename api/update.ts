@@ -5,6 +5,25 @@ import Twitter from "twitter";
 
 const fetch = require("@vercel/fetch")();
 
+const pricePerPixel = 0.000000000000006; // (6000 wei)
+
+// the # of pixels in a minute of 240p30fps, 360p30fps, 480p30fps, 720p30fps transcoded renditions.
+// (width * height * framerate * seconds in a minute)
+const pixelsPerMinute = 2995488000;
+
+export const getTotalFeeDerivedMinutes = ({
+  totalVolumeETH,
+  totalVolumeUSD,
+  pricePerPixel,
+  pixelsPerMinute,
+}): number => {
+  let ethDaiRate = totalVolumeETH / totalVolumeUSD;
+  let usdAveragePricePerPixel = pricePerPixel / ethDaiRate;
+  let feeDerivedMinutes =
+    totalVolumeUSD / usdAveragePricePerPixel / pixelsPerMinute || 0;
+  return feeDerivedMinutes;
+};
+
 const client = new Twitter({
   consumer_key: process.env.TWITTER_CONSUMER_KEY,
   consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
@@ -99,14 +118,23 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       }
     }
 
+    const minutes = await getTotalFeeDerivedMinutes({
+      totalVolumeETH: winningTicketRedeemedEvents[0].faceValue,
+      totalVolumeUSD: winningTicketRedeemedEvents[0].faceValueUSD,
+      pricePerPixel,
+      pixelsPerMinute,
+    });
+
     await client.post("statuses/update", {
-      status: `Livepeer orchestrator ${name} just redeemed ${parseFloat(
+      status: `Livepeer orchestrator ${name} just earned ${parseFloat(
         winningTicketRedeemedEvents[0].faceValue
       ).toFixed(4)} ETH ($${parseFloat(
         winningTicketRedeemedEvents[0].faceValueUSD
-      ).toFixed(2)}). https://etherscan.io/tx/${
+      ).toFixed(2)}) transcoding approximately ${Math.round(
+        minutes
+      ).toLocaleString()} minutes of video. https://etherscan.io/tx/${
         winningTicketRedeemedEvents[0].transaction.id
-      }`,
+      } `,
     });
 
     await fetch(process.env.DISCORD_WEBHOOK_URL, {
@@ -121,11 +149,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             title: "Orchestrator Payout",
             description: `[**${name}**](https://explorer.livepeer.org/accounts/${
               winningTicketRedeemedEvents[0].recipient.id
-            }/campaign) just redeemed **${parseFloat(
+            }/campaign) just earned **${parseFloat(
               winningTicketRedeemedEvents[0].faceValue
             ).toFixed(4)} ETH ($${parseFloat(
               winningTicketRedeemedEvents[0].faceValueUSD
-            ).toFixed(2)})**.`,
+            ).toFixed(2)})** transcoding approximately ${Math.round(
+              minutes
+            ).toLocaleString()} minutes of video.`,
             url: `https://etherscan.io/tx/${winningTicketRedeemedEvents[0].transaction.id}`,
             ...(image && {
               thumbnail: {
