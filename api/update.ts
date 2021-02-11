@@ -156,6 +156,9 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             ).toFixed(2)})** transcoding approximately ${Math.round(
               minutes
             ).toLocaleString()} minutes of video.`,
+            timestamp: new Date(
+              winningTicketRedeemedEvents[0].timestamp * 1000
+            ).toISOString(),
             url: `https://etherscan.io/tx/${winningTicketRedeemedEvents[0].transaction.id}`,
             ...(image && {
               thumbnail: {
