@@ -12,15 +12,15 @@ const pricePerPixel = 0.000000000000006; // (6000 wei)
 const pixelsPerMinute = 2995488000;
 
 export const getTotalFeeDerivedMinutes = ({
-  totalVolumeETH,
-  totalVolumeUSD,
+  faceValue,
+  faceValueUSD,
   pricePerPixel,
   pixelsPerMinute,
 }): number => {
-  let ethDaiRate = totalVolumeETH / totalVolumeUSD;
+  let ethDaiRate = faceValue / faceValueUSD;
   let usdAveragePricePerPixel = pricePerPixel / ethDaiRate;
   let feeDerivedMinutes =
-    totalVolumeUSD / usdAveragePricePerPixel / pixelsPerMinute || 0;
+    faceValueUSD / usdAveragePricePerPixel / pixelsPerMinute || 0;
   return feeDerivedMinutes;
 };
 
@@ -119,8 +119,8 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
 
     const minutes = await getTotalFeeDerivedMinutes({
-      totalVolumeETH: winningTicketRedeemedEvents[0].faceValue,
-      totalVolumeUSD: winningTicketRedeemedEvents[0].faceValueUSD,
+      faceValue: winningTicketRedeemedEvents[0].faceValue,
+      faceValueUSD: winningTicketRedeemedEvents[0].faceValueUSD,
       pricePerPixel,
       pixelsPerMinute,
     });
