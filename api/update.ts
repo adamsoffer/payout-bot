@@ -107,12 +107,18 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     let image = null;
 
     if (space?.defaultProfile === "3box") {
-      name = profile.name;
-      image = profile?.image?.length && profile?.image[0].contentUrl["/"];
+      if (profile?.name) {
+        name = profile.name;
+      }
+      if (profile?.image) {
+        image = profile?.image?.length && profile?.image[0].contentUrl["/"];
+      }
     }
 
     if (space?.defaultProfile === "livepeer") {
-      name = space.name;
+      if (space?.name) {
+        name = space.name;
+      }
       if (space?.image) {
         image = `https://ipfs.infura.io/ipfs/${space.image}`;
       }
