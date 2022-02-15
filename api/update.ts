@@ -83,7 +83,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   `;
 
   const { winningTicketRedeemedEvents } = await request(
-    "https://api.thegraph.com/subgraphs/name/livepeer/livepeer",
+    "https://api.thegraph.com/subgraphs/name/livepeer/arbitrum-one",
     query
   );
 
