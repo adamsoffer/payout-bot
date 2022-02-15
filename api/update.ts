@@ -138,7 +138,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         winningTicketRedeemedEvents[0].faceValueUSD
       ).toFixed(2)}) transcoding approximately ${Math.round(
         minutes
-      ).toLocaleString()} minutes of video. https://etherscan.io/tx/${
+      ).toLocaleString()} minutes of video. https://arbiscan.io/tx/${
         winningTicketRedeemedEvents[0].transaction.id
       } `,
     });
@@ -165,7 +165,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             timestamp: new Date(
               winningTicketRedeemedEvents[0].timestamp * 1000
             ).toISOString(),
-            url: `https://etherscan.io/tx/${winningTicketRedeemedEvents[0].transaction.id}`,
+            url: `https://arbiscan.io/tx/${winningTicketRedeemedEvents[0].transaction.id}`,
             ...(image && {
               thumbnail: {
                 url: image,
