@@ -44,7 +44,10 @@ async function connectToDatabase(uri) {
   }
 
   const MongoClient = require("mongodb").MongoClient;
-  const client = await MongoClient.connect(uri, { useNewUrlParser: true });
+  const client = await MongoClient.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
   const db = client.db("payoutBot");
 
   // Cache the database connection and return the connection
