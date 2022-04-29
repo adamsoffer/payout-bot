@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { request, gql } from "graphql-request";
-import Box from "3box";
 import Twitter from "twitter";
+import { ethers } from "ethers";
 
 const fetch = require("@vercel/fetch")();
 
@@ -59,7 +59,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   if (req.headers.authorization !== `Bearer ${process.env.API_TOKEN}`) {
     res.status(403);
     res.json({
-      errors: ["Unauthorizaed"],
+      errors: ["Unauthorized"],
     });
   }
   const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster0.eutpy.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`;
@@ -95,55 +95,11 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   // if the most recent payout happened after the last
   // one we stored notify discord and save new timestamp
   if (winningTicketRedeemedEvents[0].timestamp > timestamp) {
-    let profile = await Box.getProfile(
-      winningTicketRedeemedEvents[0].recipient.id
-    );
-    let space = await Box.getSpace(
-      winningTicketRedeemedEvents[0].recipient.id,
-      "livepeer"
-    );
-
-    let name = winningTicketRedeemedEvents[0].recipient.id.replace(
-      winningTicketRedeemedEvents[0].recipient.id.slice(8, 36),
-      "…"
-    );
-    let image = null;
-
-    if (space?.defaultProfile === "3box") {
-      if (profile?.name) {
-        name = profile.name;
-      }
-      if (profile?.image) {
-        image = profile?.image?.length && profile?.image[0].contentUrl["/"];
-      }
-    }
-
-    if (space?.defaultProfile === "livepeer") {
-      if (space?.name) {
-        name = space.name;
-      }
-      if (space?.image) {
-        image = `https://ipfs.infura.io/ipfs/${space.image}`;
-      }
-    }
-
-    const minutes = await getTotalFeeDerivedMinutes({
-      faceValue: winningTicketRedeemedEvents[0].faceValue,
-      faceValueUSD: winningTicketRedeemedEvents[0].faceValueUSD,
-      pricePerPixel,
-      pixelsPerMinute,
-    });
+    const { twitterStatus, discordDescription, image } =
+      await getMessageDataForEvent(winningTicketRedeemedEvents[0]);
 
     await client.post("statuses/update", {
-      status: `Livepeer orchestrator ${name} just earned ${parseFloat(
-        winningTicketRedeemedEvents[0].faceValue
-      ).toFixed(4)} ETH ($${parseFloat(
-        winningTicketRedeemedEvents[0].faceValueUSD
-      ).toFixed(2)}) transcoding approximately ${Math.round(
-        minutes
-      ).toLocaleString()} minutes of video. https://arbiscan.io/tx/${
-        winningTicketRedeemedEvents[0].transaction.id
-      } `,
+      status: twitterStatus,
     });
 
     await fetch(process.env.DISCORD_WEBHOOK_URL, {
@@ -156,15 +112,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           {
             color: 60296,
             title: "Orchestrator Payout",
-            description: `[**${name}**](https://explorer.livepeer.org/accounts/${
-              winningTicketRedeemedEvents[0].recipient.id
-            }/campaign) just earned **${parseFloat(
-              winningTicketRedeemedEvents[0].faceValue
-            ).toFixed(4)} ETH ($${parseFloat(
-              winningTicketRedeemedEvents[0].faceValueUSD
-            ).toFixed(2)})** transcoding approximately ${Math.round(
-              minutes
-            ).toLocaleString()} minutes of video.`,
+            description: discordDescription,
             timestamp: new Date(
               winningTicketRedeemedEvents[0].timestamp * 1000
             ).toISOString(),
@@ -187,4 +135,83 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   }
 
   res.status(200).send("Success");
+};
+
+export type Recipient = {
+  id: string;
+};
+
+export type Transaction = {
+  id: string;
+};
+
+export type WinningTicketRedeemedEvent = {
+  timestamp: number;
+  faceValue: string;
+  faceValueUSD: string;
+  recipient: Recipient;
+  transaction: Transaction;
+};
+
+export const getMessageDataForEvent = async (
+  event: WinningTicketRedeemedEvent
+): Promise<{
+  twitterStatus: string;
+  minutes: number;
+  name: string;
+  image: string;
+  discordDescription: string;
+}> => {
+  let name = event.recipient.id.replace(event.recipient.id.slice(8, 36), "…");
+  let image = null;
+
+  try {
+    const l1Provider = new ethers.providers.JsonRpcProvider(
+      `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`
+    );
+
+    const ensName = await l1Provider.lookupAddress(event.recipient.id);
+
+    if (ensName) {
+      name = ensName;
+    }
+
+    const ensAvatar = await l1Provider.getAvatar(event.recipient.id);
+
+    if (ensAvatar) {
+      image = ensAvatar;
+    }
+  } catch (e) {
+    // catch all to allow messages to always be sent
+    console.error(e);
+  }
+
+  const minutes = await getTotalFeeDerivedMinutes({
+    faceValue: event.faceValue,
+    faceValueUSD: event.faceValueUSD,
+    pricePerPixel,
+    pixelsPerMinute,
+  });
+
+  const twitterStatus = `Livepeer orchestrator ${name} just earned ${parseFloat(
+    event.faceValue
+  ).toFixed(4)} ETH ($${parseFloat(event.faceValueUSD).toFixed(
+    2
+  )}) transcoding approximately ${Math.round(
+    minutes
+  ).toLocaleString()} minutes of video. https://arbiscan.io/tx/${
+    event.transaction.id
+  } `;
+
+  const discordDescription = `[**${name}**](https://explorer.livepeer.org/accounts/${
+    event.recipient.id
+  }/campaign) just earned **${parseFloat(event.faceValue).toFixed(
+    4
+  )} ETH ($${parseFloat(event.faceValueUSD).toFixed(
+    2
+  )})** transcoding approximately ${Math.round(
+    minutes
+  ).toLocaleString()} minutes of video.`;
+
+  return { twitterStatus, minutes, image, name, discordDescription };
 };
