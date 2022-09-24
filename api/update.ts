@@ -92,6 +92,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
   const { timestamp } = await db.collection("payouts").findOne();
 
+  // Update last event time
+  if (winningTicketRedeemedEvents[0].timestamp > timestamp){
+    await db
+      .collection("payouts")
+      .replaceOne({}, { timestamp: winningTicketRedeemedEvents[0].timestamp });
+  }
+  
   // Build a queue of new winning tickets
   let ticketQueue = [];
   for (const thisTicket of winningTicketRedeemedEvents){
@@ -136,11 +143,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       }),
       headers: { "Content-Type": "application/json" },
     });
-
-    // update last payout time
-    await db
-      .collection("payouts")
-      .replaceOne({}, { timestamp: newTicket.timestamp });
   }
 
   res.status(200).send("Success");
