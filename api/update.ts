@@ -92,11 +92,20 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
   const { timestamp } = await db.collection("payouts").findOne();
 
-  // if the most recent payout happened after the last
-  // one we stored notify discord and save new timestamp
-  if (winningTicketRedeemedEvents[0].timestamp > timestamp) {
+  // Build a queue of new winning tickets
+  let ticketQueue = [];
+  for (const thisTicket of winningTicketRedeemedEvents){
+    if (thisTicket.timestamp > timestamp){
+      ticketQueue.push(thisTicket);
+    }else{
+      break;
+    }
+  }
+
+  // Notify once for each new winning ticket
+  for (const newTicket of ticketQueue) {
     const { twitterStatus, discordDescription, image } =
-      await getMessageDataForEvent(winningTicketRedeemedEvents[0]);
+      await getMessageDataForEvent(newTicket);
 
     await client.post("statuses/update", {
       status: twitterStatus,
@@ -114,9 +123,9 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             title: "Orchestrator Payout",
             description: discordDescription,
             timestamp: new Date(
-              winningTicketRedeemedEvents[0].timestamp * 1000
+              newTicket.timestamp * 1000
             ).toISOString(),
-            url: `https://arbiscan.io/tx/${winningTicketRedeemedEvents[0].transaction.id}`,
+            url: `https://arbiscan.io/tx/${newTicket.transaction.id}`,
             ...(image && {
               thumbnail: {
                 url: image,
@@ -131,7 +140,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     // update last payout time
     await db
       .collection("payouts")
-      .replaceOne({}, { timestamp: winningTicketRedeemedEvents[0].timestamp });
+      .replaceOne({}, { timestamp: newTicket.timestamp });
   }
 
   res.status(200).send("Success");
