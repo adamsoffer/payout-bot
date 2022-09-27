@@ -93,18 +93,18 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   const { timestamp } = await db.collection("payouts").findOne();
 
   // Update last event time
-  if (winningTicketRedeemedEvents[0].timestamp > timestamp){
+  if (winningTicketRedeemedEvents[0].timestamp > timestamp) {
     await db
       .collection("payouts")
       .replaceOne({}, { timestamp: winningTicketRedeemedEvents[0].timestamp });
   }
-  
+
   // Build a queue of new winning tickets
   let ticketQueue = [];
-  for (const thisTicket of winningTicketRedeemedEvents){
-    if (thisTicket.timestamp > timestamp){
+  for (const thisTicket of winningTicketRedeemedEvents) {
+    if (thisTicket.timestamp > timestamp) {
       ticketQueue.push(thisTicket);
-    }else{
+    } else {
       break;
     }
   }
@@ -129,9 +129,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             color: 60296,
             title: "Orchestrator Payout",
             description: discordDescription,
-            timestamp: new Date(
-              newTicket.timestamp * 1000
-            ).toISOString(),
+            timestamp: new Date(newTicket.timestamp * 1000).toISOString(),
             url: `https://arbiscan.io/tx/${newTicket.transaction.id}`,
             ...(image && {
               thumbnail: {
