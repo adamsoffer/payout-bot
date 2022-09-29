@@ -92,11 +92,27 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
   const { timestamp } = await db.collection("payouts").findOne();
 
-  // if the most recent payout happened after the last
-  // one we stored notify discord and save new timestamp
+  // Update last event time
   if (winningTicketRedeemedEvents[0].timestamp > timestamp) {
+    await db
+      .collection("payouts")
+      .replaceOne({}, { timestamp: winningTicketRedeemedEvents[0].timestamp });
+  }
+
+  // Build a queue of new winning tickets
+  let ticketQueue = [];
+  for (const thisTicket of winningTicketRedeemedEvents) {
+    if (thisTicket.timestamp > timestamp) {
+      ticketQueue.push(thisTicket);
+    } else {
+      break;
+    }
+  }
+
+  // Notify once for each new winning ticket
+  for (const newTicket of ticketQueue) {
     const { twitterStatus, discordDescription, image } =
-      await getMessageDataForEvent(winningTicketRedeemedEvents[0]);
+      await getMessageDataForEvent(newTicket);
 
     await client.post("statuses/update", {
       status: twitterStatus,
@@ -113,10 +129,8 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             color: 60296,
             title: "Orchestrator Payout",
             description: discordDescription,
-            timestamp: new Date(
-              winningTicketRedeemedEvents[0].timestamp * 1000
-            ).toISOString(),
-            url: `https://arbiscan.io/tx/${winningTicketRedeemedEvents[0].transaction.id}`,
+            timestamp: new Date(newTicket.timestamp * 1000).toISOString(),
+            url: `https://arbiscan.io/tx/${newTicket.transaction.id}`,
             ...(image && {
               thumbnail: {
                 url: image,
@@ -127,11 +141,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       }),
       headers: { "Content-Type": "application/json" },
     });
-
-    // update last payout time
-    await db
-      .collection("payouts")
-      .replaceOne({}, { timestamp: winningTicketRedeemedEvents[0].timestamp });
   }
 
   res.status(200).send("Success");
