@@ -68,7 +68,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   const query = gql`
     {
       winningTicketRedeemedEvents(
-        first: 1
+        first: 20
         orderDirection: desc
         orderBy: timestamp
       ) {
