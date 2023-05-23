@@ -114,9 +114,10 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     const { twitterStatus, discordDescription, image } =
       await getMessageDataForEvent(newTicket);
 
-    await client.post("statuses/update", {
-      status: twitterStatus,
-    });
+    // TODO: get access to twitter API
+    // await client.post("statuses/update", {
+    //   status: twitterStatus,
+    // });
 
     await fetch(process.env.DISCORD_WEBHOOK_URL, {
       method: "POST",
