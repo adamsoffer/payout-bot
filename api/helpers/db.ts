@@ -17,9 +17,9 @@ let cachedDb = null;
 export const getMongoDBURI = (): string => {
   let uri;
   if (process.env.NODE_ENV === "development") {
-    uri = `mongodb://localhost:27017/${process.env.MONGO_DB}`;
+    uri = `mongodb://localhost:27017`;
   } else {
-    uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}/${process.env.MONGO_DB}?retryWrites=true&w=majority`;
+    uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}?retryWrites=true&w=majority`;
   }
 
   return uri;
