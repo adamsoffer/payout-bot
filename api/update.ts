@@ -23,6 +23,9 @@ const WINNING_TICKET_QUERY = gql`
       recipient {
         id
       }
+      sender {
+        id
+      }
       transaction {
         id
       }
@@ -83,7 +86,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
   // Notify once for each new winning ticket.
   for (const newTicket of ticketQueue) {
-    const { twitterStatus, discordDescription, image } =
+    const { twitterStatus, discordDescription, image, cardColor} =
       await getMessageDataForEvent(newTicket);
     
     // Post a tweet using the Twitter client.
@@ -104,7 +107,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             "https://user-images.githubusercontent.com/555740/107160745-213a9480-6966-11eb-927f-a53ae12ab219.png",
           embeds: [
             {
-              color: 60296,
+              color: cardColor,
               title: "Orchestrator Payout",
               description: discordDescription,
               timestamp: new Date(newTicket.timestamp * 1000).toISOString(),
