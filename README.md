@@ -9,6 +9,7 @@ Sends an alert to Discord and Twitter anytime an orchestrator gets paid.
 - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) -
   [NVM](https://github.com/nvm-sh/nvm) is recommended for managing Node
   versions.
+- [Yarn](https://yarnpkg.com/getting-started/install)
 - [MongoDB](https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/)
 - [Vercel CLI](https://vercel.com/docs/cli)
 
@@ -34,7 +35,7 @@ Sends an alert to Discord and Twitter anytime an orchestrator gets paid.
 
 3. To send alerts to a specific channel, create a
    [Discord webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
-4. Install dependencies with `npm install`.
+4. Install dependencies with `yarn install`.
 5. Rename the `.env.example` file to `.env` and fill in the required environment
    variables:
 
@@ -52,7 +53,7 @@ Sends an alert to Discord and Twitter anytime an orchestrator gets paid.
    The `NODE_ENV` variable should be set to `development` if you are using a
    local MongoDB database.
 
-6. Run the bot with `npm run dev`.
+6. Run the bot with `vercel dev`.
 
 ### Deployment
 
@@ -85,6 +86,20 @@ Sends an alert to Discord and Twitter anytime an orchestrator gets paid.
    The `NODE_ENV` variable should be set to `development` if you are using a
    local MongoDB database.
 
-9. Deploy the bot with `vercel`.
-10. Setup a [Vercel cron job](https://vercel.com/docs/solutions/cron-jobs) to
-    run the bot every 5 minutes.
+9. Add the environment variables to the Vercel project with the `vercel env add`
+   command or through the
+   [Vercel dashboard](https://vercel.com/docs/projects/environment-variables).
+10. Deploy the bot with `vercel`.
+11. Setup a [Vercel cron job](https://vercel.com/docs/solutions/cron-jobs) to
+    run the bot every 10 minutes.
+
+    ```json
+    {
+      "crons": [
+        {
+          "path": "/api/update",
+          "schedule": "*/10 * * * *"
+        }
+      ]
+    }
+    ```
