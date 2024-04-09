@@ -9,82 +9,69 @@ Sends an alert to Discord and Twitter anytime an orchestrator gets paid.
 - [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) -
   [NVM](https://github.com/nvm-sh/nvm) is recommended for managing Node
   versions.
+- [Yarn](https://yarnpkg.com/getting-started/install)
 - [MongoDB](https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/)
 - [Vercel CLI](https://vercel.com/docs/cli)
 
 ### Local Development
 
-1. Create a local MongoDB database called `livepeer-payout-bot`:
+1. Ensure MongoDB is running:
 
    ```bash
-   mongosh
-   use livepeer-payout-bot
+   sudo systemctl start mongod
    ```
 
-2. Create a user with read and write access to the `livepeer-payout-bot`
-   database:
-
-   ```bash
-   db.createUser({
-       user: "livepeer-payout-bot",
-       pwd: "password",
-       roles: ["readWrite"]
-   })
-   ```
-
-3. To send alerts to a specific channel, create a
-   [Discord webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
-4. Install dependencies with `npm install`.
-5. Rename the `.env.example` file to `.env` and fill in the required environment
+2. To send alerts to a specific Discord channel, create a
+   [Discord webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+   for that channel.
+3. Install dependencies with `yarn install`.
+4. Rename the `.env.example` file to `.env` and fill in the required environment
    variables:
 
    ```bash
-   MONGO_USERNAME=                         # Database username
-   MONGO_PASSWORD=                         # Database password
-   MONGO_HOST=cluster0.eutpy.mongodb.net   # Database host
-   MONGO_DB=                               # Database name
    DISCORD_WEBHOOK_URL=                    # Discord webhook url
    API_TOKEN=                              # Bearer Token for API
    INFURA_KEY=                             # Infura API Key
-   NODE_ENV=                               # Environment (development, production)
+   NODE_ENV=development                    # Environment (development, production)
    ```
 
    The `NODE_ENV` variable should be set to `development` if you are using a
    local MongoDB database.
 
-6. Run the bot with `npm run dev`.
+5. Run the bot with `vercel dev`.
 
 ### Deployment
 
-1. Follow stp 1-4 from the [local development setup guide](#local-development).
-2. Create an [Vercel account](https://vercel.com/signup).
-3. Create a [Infura](https://infura.io/) or [Alchemy](https://www.alchemy.com/)
+1. Create an [Vercel account](https://vercel.com/signup).
+2. Create a [Infura](https://infura.io/) or [Alchemy](https://www.alchemy.com/)
    account and get an API key.
-4. Create a [Atlas](https://www.mongodb.com/cloud/atlas) account and
+3. Create a [Atlas](https://www.mongodb.com/cloud/atlas) account and
    [create a new cluster](https://www.mongodb.com/docs/atlas/tutorial/create-new-cluster/).
-5. Create a
+4. Create a
    [new database user](https://www.mongodb.com/docs/atlas/security-add-mongodb-users/)
-   with read and write access to the `livepeer-payout-bot` database.
-6. Create a new database called `livepeer-payout-bot` in the cluster.
-7. To send alerts to a specific channel, create a
-   [Discord webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
-8. Rename the `.env.example` file to `.env` and fill in the required environment
-   variables:
+   with read and write access to the cluster.
+5. To send alerts to a specific Discord channel, create a
+   [Discord webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+   for that channel.
+6. Add the environment variables found in the `.env.example` file to all
+   environments (i.e. Production, Preview, Development) in the Vercel project
+   with the `vercel env add` command or through the
+   [Vercel dashboard](https://vercel.com/docs/projects/environment-variables).
+7. Deploy the bot with `vercel`.
+8. Setup a [Vercel cron job](https://vercel.com/docs/solutions/cron-jobs) to run
+   the bot every 10 minutes.
 
-   ```bash
-   MONGO_USERNAME=                         # Database username
-   MONGO_PASSWORD=                         # Database password
-   MONGO_HOST=cluster0.eutpy.mongodb.net   # Database host
-   MONGO_DB=                               # Database name
-   DISCORD_WEBHOOK_URL=                    # Discord webhook url
-   API_TOKEN=                              # Bearer Token for API
-   INFURA_KEY=                             # Infura API Key
-   NODE_ENV=                               # Environment (development, production)
+   ```json
+   {
+     "crons": [
+       {
+         "path": "/api/update",
+         "schedule": "*/10 * * * *"
+       }
+     ]
+   }
    ```
 
-   The `NODE_ENV` variable should be set to `development` if you are using a
-   local MongoDB database.
-
-9. Deploy the bot with `vercel`.
-10. Setup a [Vercel cron job](https://vercel.com/docs/solutions/cron-jobs) to
-    run the bot every 5 minutes.
+9. Disable
+   [Vercel's Deployment Protection](https://vercel.com/docs/security/deployment-protection)
+   if you want to be able to call the `/api/update` endpoint remotely.
