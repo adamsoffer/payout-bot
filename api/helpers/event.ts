@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 
 import { WinningTicketRedeemedEvent, MessageData } from "../types";
 
-const defaultPricePerPixel = 50 // Wei
+const defaultPricePerPixel = 50; // Wei
 
 // This represents the number of pixels in a minute of video for various resolutions at 30 frames per second.
 // The calculation is (width * height * framerate * 60 seconds), and applies to the following resolutions: 240p, 360p, 480p, 720p.
@@ -22,7 +22,7 @@ export const CARD_COLORS = {
 
 /**
  * Fetch last known price per pixel for the given orchestrator address.
- * 
+ *
  * @param orchAddr - Orchestrator address.
  * @returns The price per pixel in ETH.
  */
@@ -35,7 +35,7 @@ const getPricePerPixel = async (orchAddr: string): Promise<number> => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     const data = await response.json();
 
     if (!data.pricePerPixel) {
@@ -45,10 +45,12 @@ const getPricePerPixel = async (orchAddr: string): Promise<number> => {
       return defaultPricePerPixel;
     }
 
-    return parseFloat(ethers.utils.formatEther(data.pricePerPixel));
+    return parseFloat(ethers.utils.formatEther(Math.round(data.pricePerPixel)));
   } catch (error) {
     console.error(`Failed to fetch price per pixel: ${error}`);
-    return parseFloat(ethers.utils.formatEther(defaultPricePerPixel));
+    return parseFloat(
+      ethers.utils.formatEther(Math.round(defaultPricePerPixel))
+    );
   }
 };
 
