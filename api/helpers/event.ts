@@ -84,7 +84,7 @@ const getTotalFeeDerivedMinutes = ({
  * @returns Boolean indicating if the sender is an AI broadcaster.
  */
 const isAIBroadcaster = (sender: string): boolean => {
-  return AIBroadcasters.broadcasters.some((b) => b.address === sender);
+  return AIBroadcasters.broadcasters.some((b) => b.address.toLowerCase() === sender.toLowerCase());
 };
 
 /**
