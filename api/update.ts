@@ -45,7 +45,10 @@ const client = new Twitter({
  * Setup Livepeer Payouts Bot 'Update' API function.
  */
 export default async (req: VercelRequest, res: VercelResponse) => {
-  if (req.headers.authorization !== `Bearer ${process.env.API_TOKEN}`) {
+  if (
+    req.headers.authorization !== `Bearer ${process.env.API_TOKEN}` &&
+    req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`
+  ) {
     res.status(403);
     res.json({
       errors: ["Unauthorized"],
@@ -86,9 +89,9 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
   // Notify once for each new winning ticket.
   for (const newTicket of ticketQueue) {
-    const { twitterStatus, discordDescription, image, cardColor} =
+    const { twitterStatus, discordDescription, image, cardColor } =
       await getMessageDataForEvent(newTicket);
-    
+
     // Post a tweet using the Twitter client.
     if (process.env.TWITTER_CONSUMER_KEY) {
       // TODO: get access to twitter API
