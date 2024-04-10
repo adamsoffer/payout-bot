@@ -5,7 +5,7 @@ import { ethers } from "ethers";
 
 import { WinningTicketRedeemedEvent, MessageData } from "../types";
 
-const pricePerPixel = 0.0000000000000012; // (1200 wei)
+const defaultPricePerPixel = 50 // Wei
 
 // This represents the number of pixels in a minute of video for various resolutions at 30 frames per second.
 // The calculation is (width * height * framerate * 60 seconds), and applies to the following resolutions: 240p, 360p, 480p, 720p.
@@ -18,6 +18,38 @@ import AIBroadcasters from "../../cfg/AIBroadcasters.json";
 export const CARD_COLORS = {
   transcoding: 60296,
   ai: 16766720,
+};
+
+/**
+ * Fetch last known price per pixel for the given orchestrator address.
+ * 
+ * @param orchAddr - Orchestrator address.
+ * @returns The price per pixel in ETH.
+ */
+const getPricePerPixel = async (orchAddr: string): Promise<number> => {
+  try {
+    const response = await fetch(
+      `https://explorer.livepeer.org/api/score/${orchAddr}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+
+    if (!data.pricePerPixel) {
+      console.warn(
+        "pricePerPixel is not available in the response, using default value"
+      );
+      return defaultPricePerPixel;
+    }
+
+    return parseFloat(ethers.utils.formatEther(data.pricePerPixel));
+  } catch (error) {
+    console.error(`Failed to fetch price per pixel: ${error}`);
+    return parseFloat(ethers.utils.formatEther(defaultPricePerPixel));
+  }
 };
 
 /**
@@ -55,7 +87,7 @@ const isAIBroadcaster = (sender: string): boolean => {
 
 /**
  * Get Discord card color based on the type of ticket (e.g AI or transcoding).
- * 
+ *
  * @param event The WinningTicketRedeemedEvent.
  * @returns The card color in Discord color format.
  */
@@ -65,11 +97,11 @@ const getCardColor = (event: WinningTicketRedeemedEvent): number => {
   }
 
   return CARD_COLORS.transcoding;
-}
+};
 
 /**
  * Create a Twitter status for the given event.
- * 
+ *
  * @param name Orchestrator name.
  * @param event The WinningTicketRedeemedEvent.
  * @returns A Twitter status message.
@@ -82,13 +114,16 @@ const createTwitterStatus = async (
   const usdEarned = parseFloat(event.faceValueUSD).toFixed(2);
   const transactionUrl = `https://arbiscan.io/tx/${event.transaction.id}`;
 
-  const commonMessage = `Livepeer orchestrator ${name} just earned ${ethEarned} ETH ($${usdEarned})`
-  
-  // If the orchestrator is an AI broadcaster, return AI broadcaster Discord description.
+  const commonMessage = `Livepeer orchestrator ${name} just earned ${ethEarned} ETH ($${usdEarned})`;
+
+  // If the Gateway node is recognized as an AI Gateway, return AI ticket status on Twitter.
   // TODO: Replace with check based on job type in the `auxData` field when available.
   if (isAIBroadcaster(event.sender.id)) {
     return `${commonMessage} performing AI inference on the AI subnet. ${transactionUrl}`;
   }
+
+  // Fetch orchestrator's current pixel price.
+  const pricePerPixel = await getPricePerPixel(event.recipient.id);
 
   const minutes = await getTotalFeeDerivedMinutes({
     faceValue: event.faceValue,
@@ -119,11 +154,14 @@ const createDiscordDescription = async (
 
   const commonMessage = `[**${name}**](${recipientUrl}) just earned **${ethEarned} ETH ($${usdEarned})**`;
 
-  // If the orchestrator is an AI broadcaster, return AI broadcaster Discord description.
+  // If the Gateway node is recognized as an AI Gateway, return AI ticket description on Discord.
   // TODO: Replace with check based on job type in the `auxData` field when available.
   if (isAIBroadcaster(event.sender.id)) {
     return `${commonMessage} performing AI inference on the [**AI subnet**](https://explorer.livepeer.org/treasury/82843445347363563575858115586375001878287509193479217286690041153234635982713).`;
   }
+
+  // Fetch orchestrator's current pixel price.
+  const pricePerPixel = await getPricePerPixel(event.recipient.id);
 
   const minutes = await getTotalFeeDerivedMinutes({
     faceValue: event.faceValue,
@@ -175,6 +213,11 @@ export const getMessageDataForEvent = async (
   const twitterStatus = await createTwitterStatus(name, event);
   const discordDescription = await createDiscordDescription(name, event);
 
-
-  return { twitterStatus, image, name, discordDescription, cardColor: getCardColor(event)};
+  return {
+    twitterStatus,
+    image,
+    name,
+    discordDescription,
+    cardColor: getCardColor(event),
+  };
 };
