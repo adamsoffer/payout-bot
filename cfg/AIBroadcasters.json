@@ -7,6 +7,10 @@
     {
       "name": "stronk-gateway.eth",
       "address": "0x87d4396204035736422c2c6dfce423bba6daa776"
+    },
+    {
+      "name": "Transcode.eth",
+      "address": "0x491F5F5664f11a1e0Ba6902A8cA37C09150bE0DB"
     }
   ]
 }
