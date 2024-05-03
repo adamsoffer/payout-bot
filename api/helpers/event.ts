@@ -3,7 +3,7 @@
  */
 import { ethers } from "ethers";
 
-import { WinningTicketRedeemedEvent, MessageData } from "../types";
+import { MessageData, WinningTicketRedeemedEvent } from "../types";
 
 const defaultPricePerPixel = 50; // Wei
 
@@ -159,7 +159,7 @@ const createDiscordDescription = async (
   // If the Gateway node is recognized as an AI Gateway, return AI ticket description on Discord.
   // TODO: Replace with check based on job type in the `auxData` field when available.
   if (isAIBroadcaster(event.sender.id)) {
-    return `${commonMessage} performing AI inference on the [**AI subnet**](https://explorer.livepeer.org/treasury/82843445347363563575858115586375001878287509193479217286690041153234635982713).`;
+    return `${commonMessage} performing AI inference on the [**AI subnet**](https://docs.livepeer.ai/ai/introduction).`;
   }
 
   // Fetch orchestrator's current pixel price.

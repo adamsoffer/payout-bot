@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import { getMessageDataForEvent, CARD_COLORS } from "../api/helpers/event";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
+import { CARD_COLORS, getMessageDataForEvent } from "../api/helpers/event";
 
 dotenv.config();
 
@@ -37,7 +37,9 @@ const DUMMY_AI_BROADCASTER_EVENT = {
 it("pulls from ENS for transcoding tickets", async function () {
   this.timeout(10000);
 
-  const messageData = await getMessageDataForEvent(DUMMY_TRANSCODING_TICKET_EVENT);
+  const messageData = await getMessageDataForEvent(
+    DUMMY_TRANSCODING_TICKET_EVENT
+  );
 
   expect(messageData.name).to.equal(ENS_NAME);
   expect(messageData.twitterStatus).to.equal(
@@ -68,6 +70,6 @@ it("pulls from ENS for AI tickets", async function () {
   expect(messageData.cardColor).to.equal(CARD_COLORS.ai);
 
   expect(messageData.discordDescription).to.equal(
-    `[**${ENS_NAME}**](https://explorer.livepeer.org/accounts/0xa678c0342cc2AD21B084923b995a63cD5D439B5b/campaign) just earned **0.0760 ETH ($212.60)** performing AI inference on the [**AI subnet**](https://explorer.livepeer.org/treasury/82843445347363563575858115586375001878287509193479217286690041153234635982713).`
+    `[**${ENS_NAME}**](https://explorer.livepeer.org/accounts/0xa678c0342cc2AD21B084923b995a63cD5D439B5b/campaign) just earned **0.0760 ETH ($212.60)** performing AI inference on the [**AI subnet**](https://docs.livepeer.ai/ai/introduction).`
   );
 });
