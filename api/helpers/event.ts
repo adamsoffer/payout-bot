@@ -42,7 +42,7 @@ const getPricePerPixel = async (orchAddr: string): Promise<number> => {
       console.warn(
         "pricePerPixel is not available in the response, using default value"
       );
-      return defaultPricePerPixel;
+      return parseFloat(ethers.utils.formatEther(Math.round(defaultPricePerPixel)));
     }
 
     return parseFloat(ethers.utils.formatEther(Math.round(data.pricePerPixel)));
@@ -60,7 +60,7 @@ const getPricePerPixel = async (orchAddr: string): Promise<number> => {
  * @param params - An object containing the parameters.
  * @param params.faceValue - The face value.
  * @param params.faceValueUSD - The face value in USD.
- * @param params.pricePerPixel - The price per pixel.
+ * @param params.pricePerPixel - The price per pixel in ETH.
  * @param params.pixelsPerMinute - The number of pixels per minute.
  * @returns The total fee derived minutes.
  */
@@ -84,7 +84,9 @@ const getTotalFeeDerivedMinutes = ({
  * @returns Boolean indicating if the sender is an AI broadcaster.
  */
 const isAIBroadcaster = (sender: string): boolean => {
-  return AIBroadcasters.broadcasters.some((b) => b.address.toLowerCase() === sender.toLowerCase());
+  return AIBroadcasters.broadcasters.some(
+    (b) => b.address.toLowerCase() === sender.toLowerCase()
+  );
 };
 
 /**
@@ -159,7 +161,7 @@ const createDiscordDescription = async (
   // If the Gateway node is recognized as an AI Gateway, return AI ticket description on Discord.
   // TODO: Replace with check based on job type in the `auxData` field when available.
   if (isAIBroadcaster(event.sender.id)) {
-    return `${commonMessage} performing AI inference on the [**AI subnet**](https://docs.livepeer.ai/ai/introduction).`;
+    return `${commonMessage} performing AI inference on the [**AI subnet**](https://docs.livepeer.org/ai/introduction).`;
   }
 
   // Fetch orchestrator's current pixel price.
@@ -191,6 +193,13 @@ export const getMessageDataForEvent = async (
 
   // Attempt to fetch ENS name and avatar.
   try {
+    if (!process.env.INFURA_KEY) {
+      throw new Error(
+        "INFURA_KEY is not defined in the env variables. Ticket message data could " +
+        "not be fetched."
+      );
+    }
+
     const l1Provider = new ethers.providers.JsonRpcProvider(
       `https://mainnet.infura.io/v3/${process.env.INFURA_KEY}`
     );

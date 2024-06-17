@@ -43,7 +43,7 @@ it("pulls from ENS for transcoding tickets", async function () {
 
   expect(messageData.name).to.equal(ENS_NAME);
   expect(messageData.twitterStatus).to.equal(
-    `Livepeer orchestrator ${ENS_NAME} just earned 0.0760 ETH ($212.60) transcoding approximately 21,135 minutes of video. https://arbiscan.io/tx/0x9aedf32d275f77f879857d0629af7cd10bf93dee407e2044ac6da2c9b51dfa7d`
+    `Livepeer orchestrator ${ENS_NAME} just earned 0.0760 ETH ($212.60) transcoding approximately 507,232 minutes of video. https://arbiscan.io/tx/0x9aedf32d275f77f879857d0629af7cd10bf93dee407e2044ac6da2c9b51dfa7d`
   );
   expect(messageData.image).to.equal(
     "https://gateway.ipfs.io/ipfs/QmV1wrG2srGPFTrkNZtQH8z3CKcDKS1eMFroqcYkBaFX3Q"
@@ -51,7 +51,7 @@ it("pulls from ENS for transcoding tickets", async function () {
   expect(messageData.cardColor).to.equal(CARD_COLORS.transcoding);
 
   expect(messageData.discordDescription).to.equal(
-    `[**${ENS_NAME}**](https://explorer.livepeer.org/accounts/0xa678c0342cc2AD21B084923b995a63cD5D439B5b/campaign) just earned **0.0760 ETH ($212.60)** transcoding approximately 21,135 minutes of video.`
+    `[**${ENS_NAME}**](https://explorer.livepeer.org/accounts/0xa678c0342cc2AD21B084923b995a63cD5D439B5b/campaign) just earned **0.0760 ETH ($212.60)** transcoding approximately 507,232 minutes of video.`
   );
 });
 
@@ -70,6 +70,6 @@ it("pulls from ENS for AI tickets", async function () {
   expect(messageData.cardColor).to.equal(CARD_COLORS.ai);
 
   expect(messageData.discordDescription).to.equal(
-    `[**${ENS_NAME}**](https://explorer.livepeer.org/accounts/0xa678c0342cc2AD21B084923b995a63cD5D439B5b/campaign) just earned **0.0760 ETH ($212.60)** performing AI inference on the [**AI subnet**](https://docs.livepeer.ai/ai/introduction).`
+    `[**${ENS_NAME}**](https://explorer.livepeer.org/accounts/0xa678c0342cc2AD21B084923b995a63cD5D439B5b/campaign) just earned **0.0760 ETH ($212.60)** performing AI inference on the [**AI subnet**](https://docs.livepeer.org/ai/introduction).`
   );
 });
