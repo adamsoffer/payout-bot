@@ -60,7 +60,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
   // Retrieve the latest winning ticket redeemed events.
   const { winningTicketRedeemedEvents } = await request(
-    "https://api.thegraph.com/subgraphs/name/livepeer/arbitrum-one",
+    `https://gateway-arbitrum.network.thegraph.com/api/${process.env.GRAPH_API_KEY}/subgraphs/id/FE63YgkzcpVocxdCEyEYbvjYqEf2kb1A6daMYRxmejYC`,
     WINNING_TICKET_QUERY
   );
 
