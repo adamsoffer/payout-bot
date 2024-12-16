@@ -23,6 +23,10 @@
     {
       "name": "Transcode.eth",
       "address": "0x491F5F5664f11a1e0Ba6902A8cA37C09150bE0DB"
+    },
+    {
+      "name": "Livepeer INC",
+      "address": "0xCA3331D67e87816aDB30D9562a6e8c0623fB7feF"
     }
   ]
 }
