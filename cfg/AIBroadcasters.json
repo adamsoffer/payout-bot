@@ -27,6 +27,10 @@
     {
       "name": "Livepeer INC",
       "address": "0xCA3331D67e87816aDB30D9562a6e8c0623fB7feF"
+    },
+    {
+      "name": "Agent SPE",
+      "address": "0x5be44e23041e93cdf9bcd5a0968524e104e38ae1"
     }
   ]
 }
