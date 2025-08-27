@@ -1,21 +1,25 @@
 # Livepeer Payout Bot
 
+![Node.js](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen) 
+![Yarn](https://img.shields.io/badge/yarn-%3E%3D1.22.0-blue)
+
 Sends an alert to Discord and Twitter anytime an orchestrator gets paid.
 
 ## Setup
 
 ### Prerequisites
 
-> [!IMPORTANT]\
-> The [hosted Livepeer subgraph](https://thegraph.com/hosted-service/subgraph/livepeer/livepeer) has been deprecated. This bot now utilizes the [Livepeer subgraph](https://thegraph.com/explorer/subgraphs/FE63YgkzcpVocxdCEyEYbvjYqEf2kb1A6daMYRxmejYC?view=Query&chain=arbitrum-one) on The Graph for data retrieval from the Livepeer network. To access this service, you will need an API key and an account with sufficient GRT tokens for queries.
-
-- [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) -
-  [NVM](https://github.com/nvm-sh/nvm) is recommended for managing Node
-  versions.
+- [Node.js 20.x](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) (includes npm)
 - [Yarn](https://yarnpkg.com/getting-started/install)
 - [MongoDB](https://www.mongodb.com/docs/manual/tutorial/install-mongodb-on-ubuntu/)
 - [Vercel CLI](https://vercel.com/docs/cli)
 - [A Graph API key](https://thegraph.com/docs/developer/quick-start#request-api-key)
+
+> [!IMPORTANT]
+> The [hosted Livepeer subgraph](https://thegraph.com/hosted-service/subgraph/livepeer/livepeer) has been deprecated. This bot now utilizes the [Livepeer subgraph](https://thegraph.com/explorer/subgraphs/FE63YgkzcpVocxdCEyEYbvjYqEf2kb1A6daMYRxmejYC?view=Query&chain=arbitrum-one) on The Graph for data retrieval from the Livepeer network. To access this service, you will need an API key and an account with sufficient GRT tokens for queries.
+
+> [!TIP]
+> Use `nvm install` or `asdf install` to automatically switch to the correct versions.
 
 ### Local Development
 
